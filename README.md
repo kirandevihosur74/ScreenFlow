@@ -37,22 +37,6 @@ python scripts/setup_auth.py
 # Press Enter when done; profile saved under auth_states/
 ```
 
-### Manual Setup (Alternative)
-
-```bash
-# macOS example
-CHROME_EXECUTABLE=/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-python - <<'PY'
-import os, subprocess
-from pathlib import Path
-chrome = os.environ['CHROME_EXECUTABLE']
-profile = Path('auth_states/linear')
-profile.mkdir(parents=True, exist_ok=True)
-subprocess.Popen([chrome, f'--user-data-dir={profile}', '--start-maximized', 'https://linear.app'])
-input('Login manually, then press Enter...')
-PY
-```
-
 ### Auth Files
 
 ```
@@ -61,8 +45,6 @@ auth_states/
   notion/
   asana/
 ```
-
-**Security Note:** These files contain session tokens. Keep `auth_states/` out of version control (see `.gitignore`).
 
 ## Installation
 
@@ -84,7 +66,7 @@ MAX_STEPS=15       # optional override
 
 ## Usage
 
-Interactive CLI (default):
+Interactive CLI:
 
 ```bash
 python main.py
@@ -102,6 +84,19 @@ API mode example:
 ```bash
 echo '{"task":"Create project","app_url":"https://linear.app"}' | python main.py api
 ```
+
+## Agent System Architecture
+
+Agent B combines Playwright-driven browser automation with Anthropic Claude to execute arbitrary tasks while capturing UI state. The flow:
+
+![Agent System Architecture](Architecture_diagram.png)
+
+1. Agent B receives a task from Agent A via CLI or stdin JSON.
+2. `PlaywrightCapture` launches Chrome, navigates to the target app, and iteratively:
+   - Captures the current UI state.
+   - Sends the screenshot plus context to Claude.
+   - Executes Claude's chosen action (click/type/navigate/wait).
+3. After completion, the agent packages screenshots and metadata via `WorkflowStorage`.
 
 ## Outputs
 
@@ -121,12 +116,3 @@ Run the automated checks with pytest:
 ```bash
 python -m pytest
 ```
-
-## Notes
-
-- Uses Chromium launched by Playwright (non-headless) with a modern UA string.
-- Claude must return valid JSON decisions; malformed responses are handled and may stop the run early.
-- The system is general-purpose: no workflows are hardcoded beyond optional URL hints in `core.config.Config.APP_URLS`.
-- Saved auth states dramatically improve success rates—run `python scripts/setup_auth.py` for each app before demoing.
-- Requires Google Chrome installed locally (the system launches the Chrome channel for authentication).
-- Close any Chrome window using the same profile before running; delete `auth_states/<app>/SingletonLock` if a previous session crashed.
