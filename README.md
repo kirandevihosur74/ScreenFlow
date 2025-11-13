@@ -1,4 +1,4 @@
-# AI Workflow Capture
+# FlowLens (UI workflow capturing automation)
 
 Playwright-driven system that partners with Anthropic Claude to capture UI workflows end-to-end. Agent B receives natural language tasks, autonomously operates a browser, records every UI state, and packages the results as datasets.
 
