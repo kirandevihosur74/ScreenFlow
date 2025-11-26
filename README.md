@@ -2,6 +2,8 @@
 
 Playwright-driven system that partners with Anthropic Claude to capture UI workflows end-to-end. Agent B receives natural language tasks, autonomously operates a browser, records every UI state, and packages the results as datasets.
 
+Loom Demo: https://www.loom.com/share/ea1f5f5f85364dfda407e0e04fdbb2e8
+
 ## Project Structure
 
 ```
